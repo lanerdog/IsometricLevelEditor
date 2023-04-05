@@ -17,9 +17,10 @@ export class Renderer {
         const tileHeight = ctx.canvas.height / camera.zoom;
 
         let tileText = "";
+        let extraCameraSpace = Math.ceil(camera.zoom / 10 * 2.6);
 
-        for(let x = startX + camera.zoom * 2 + 5; x > startX - 11; x--) {
-            for (let y = startY - 5; y < startY + camera.zoom * 2 + 10; y++) {
+        for(let x = startX + camera.zoom * 2 + 5; x > startX - extraCameraSpace; x--) {
+            for (let y = startY - 5; y < startY + camera.zoom * 2 + extraCameraSpace; y++) {
                 if (x > -1 && x < level.tiles.length && y > -1 && y < level.tiles[x].length) {
                     //reposition to line up for isometric
                     let tileX = (x - startX - camera.zoom) * tileWidth/2 + (y - startY ) * tileWidth/2;
