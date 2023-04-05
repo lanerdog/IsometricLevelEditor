@@ -83,6 +83,8 @@ export class Main {
         }
 
         this.level = parsedLevel;
+        this.camera.x = 0;
+        this.camera.y = 0;
     }
 
     start() {
