@@ -107,7 +107,9 @@ export class Main {
         } else if (editMode.startsWith('tile')) {
             let tileName = editMode.split('-')[1].toLowerCase();
             if (!mouseTile || mouseTile.name.toLowerCase() !== tileName){
-                this.level.tiles[this.renderer.mouseTileX][this.renderer.mouseTileY] = this.data.tiles[tileName].copy();
+                let newTile = this.data.tiles[tileName].copy();
+                newTile.passable = mouseTile?.passable ?? false;
+                this.level.tiles[this.renderer.mouseTileX][this.renderer.mouseTileY] = newTile;
             }
         } else if (editMode === 'delete-tile') {
             this.level.tiles[this.renderer.mouseTileX][this.renderer.mouseTileY] = this.data.tiles['empty'].copy();
