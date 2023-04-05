@@ -1,9 +1,11 @@
 import React from "react";
 import { Toolbar, AppBar, IconButton, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
-import { LayersClear, RemoveCircle, OpenInBrowser, Menu as MenuIcon, SaveAlt, InsertDriveFile, Help } from "@mui/icons-material"; 
+import { LayersClear, RemoveCircle, OpenInBrowser, Menu as MenuIcon, SaveAlt, InsertDriveFile, Help, Texture, CropSquare } from "@mui/icons-material"; 
 
 export function TitleBar(props) {
     const [anchorEl, setAnchorEl] = React.useState(null);
+    let selectedPassing = props.editMode.startsWith('passable');
+    let selectedImpassable = props.editMode.startsWith('impassable');
     let selectedDelete = props.editMode.startsWith('delete') ? props.editMode.split('-')[1] : '';
 
     function handleOpenMenu(event) {
@@ -76,6 +78,16 @@ export function TitleBar(props) {
                         </MenuItem>
                     </Menu>
                     <div style={{marginLeft: 'auto'}}>
+                        <Tooltip title="Draw Passable">
+                            <IconButton onClick={() => props.handlePassingMode('passable')}>
+                                <CropSquare color={selectedPassing ? 'primary' : 'inherit'}/>
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Draw Impassable">
+                            <IconButton onClick={() => props.handlePassingMode('impassable')}>
+                                <Texture color={selectedImpassable ? 'primary' : 'inherit'}/>
+                            </IconButton>
+                        </Tooltip>
                         <Tooltip title="Delete Tiles">
                             <IconButton onClick={() => props.handleDeletionMode('tile')}>
                                 <LayersClear color={selectedDelete === 'tile' ? 'primary' : 'inherit'}/>

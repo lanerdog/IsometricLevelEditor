@@ -44,6 +44,12 @@ export function Editor() {
         }
     }
 
+    function handlePassingMode(mode) {
+        if (editMode !== mode) {
+            setEditMode(mode);
+        }
+    }
+
     function handleTileSelection(tileName) {
         let setTo = `tile-${tileName}`;
         if (editMode !== setTo) {
@@ -107,7 +113,7 @@ export function Editor() {
                 main?.handleKeyUp();
             }}
         >
-            <TitleBar handleDeletionMode={handleDeletionMode} handleNew={handleNew} handleLoad={handleLoad} handleSave={handleSave} handleHelp={handleHelp} editMode={editMode}/>
+            <TitleBar handleDeletionMode={handleDeletionMode} handlePassingMode={handlePassingMode} handleNew={handleNew} handleLoad={handleLoad} handleSave={handleSave} handleHelp={handleHelp} editMode={editMode}/>
             <div style={{display: 'flex', flexDirection: 'row'}}>
                 <canvas style={{minWidth: '82%', maxHeight: '92vh', border:'2px', borderColor:'white'}}
                     

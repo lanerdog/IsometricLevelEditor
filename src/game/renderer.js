@@ -6,7 +6,7 @@ export class Renderer {
         this.mouseTileY = 0;
     }
 
-    draw(ctx, camera, level, mouseX, mouseY) {
+    draw(ctx, camera, level, mouseX, mouseY, drawNonPassables = false) {
         //ctx.fillRect(0, ctx.canvas.width, ctx.canvas.height);
         ctx.fillStyle = "#48657D";
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -33,7 +33,7 @@ export class Renderer {
                         (tileBottomX > -1 && tileBottomX < ctx.canvas.width && tileY > -1 && tileY < ctx.canvas.height) || 
                         (tileX > -1 && tileX < ctx.canvas.width && tileBottomY > -1 && tileBottomY < ctx.canvas.height)) {
                         if(level.tiles[x][y]) {
-                            let isMouseInside = this.drawTile(ctx, level.tiles[x][y], Math.floor(tileX), Math.floor(tileY), tileWidth, tileHeight, mouseX, mouseY);
+                            let isMouseInside = this.drawTile(ctx, level.tiles[x][y], Math.floor(tileX), Math.floor(tileY), tileWidth, tileHeight, mouseX, mouseY, drawNonPassables);
                             if (isMouseInside) {
                                 this.mouseTileX = x;
                                 this.mouseTileY = y;
@@ -54,7 +54,7 @@ export class Renderer {
         ctx.fillText(tileText, 20, 20);
     }
 
-    drawTile(ctx, tile, tileX, tileY, tileWidth, tileHeight, mouseX, mouseY) {
+    drawTile(ctx, tile, tileX, tileY, tileWidth, tileHeight, mouseX, mouseY, drawNonPassables) {
         const frameBuffer = tile.activeAnimation.getFrameBuffer();
         let isMouseInside = false;
 
@@ -71,12 +71,18 @@ export class Renderer {
                             if (!isMouseInside && (4 * (mouseY * this.screenBuffer.width + mouseX)) === bufferSample) {
                                 isMouseInside = true;
                             }
-                            this.screenBuffer.data[bufferSample] = textureBuffer[textureSample];
-                            this.screenBuffer.data[bufferSample + 1] = textureBuffer[textureSample + 1];
-                            this.screenBuffer.data[bufferSample + 2] = textureBuffer[textureSample + 2];
+                            if (drawNonPassables && !tile.passable && x % 3 === 0) {
+                                this.screenBuffer.data[bufferSample] = 255;
+                                this.screenBuffer.data[bufferSample + 1] = 0;
+                                this.screenBuffer.data[bufferSample + 2] = 0;
+                            } else {
+                                this.screenBuffer.data[bufferSample] = textureBuffer[textureSample];
+                                this.screenBuffer.data[bufferSample + 1] = textureBuffer[textureSample + 1];
+                                this.screenBuffer.data[bufferSample + 2] = textureBuffer[textureSample + 2];
+                            }                            
+                            
                             this.screenBuffer.data[bufferSample + 3] = 255;
                         }
-                        
                     }
             }
         }

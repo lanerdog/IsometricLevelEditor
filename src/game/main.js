@@ -94,7 +94,7 @@ export class Main {
     update() {
         this.camera.x += this.cameraMoveX;
         this.camera.y += this.cameraMoveY;
-        this.renderer.draw(this.ctx, this.camera, this.level, this.mouseX, this.mouseY);
+        this.renderer.draw(this.ctx, this.camera, this.level, this.mouseX, this.mouseY, true);
     }
 
     placeEdit(editMode) {
@@ -114,6 +114,14 @@ export class Main {
         } else if (editMode === 'delete-object') {
             if (mouseTile) {
                 mouseTile.levelObject = undefined;
+            }
+        } else if (editMode === 'passable') {
+            if (mouseTile && !mouseTile.passable) {
+                mouseTile.passable = true;
+            }
+        } else if (editMode === 'impassable') {
+            if (mouseTile && mouseTile.passable) {
+                mouseTile.passable = false;
             }
         }
     }
