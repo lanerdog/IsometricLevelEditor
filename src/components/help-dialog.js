@@ -10,7 +10,8 @@ export function HelpDialog(props) {
                 <div style={{marginBottom: '20px'}}>
                     <Typography>Controls:</Typography>
                     <Typography>W, A, S, D to move camera</Typography>
-                    <Typography>Mouse Wheel to zoom camera</Typography>
+                    <Typography>Click Mouse Wheel to move camera</Typography>
+                    <Typography>Scroll Mouse Wheel to zoom camera</Typography>
                     <Typography>Mouse Down to delete or draw</Typography>
                 </div>
                 <img src='../rsc/logo.png' />

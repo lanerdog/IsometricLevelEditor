@@ -153,6 +153,11 @@ export class Main {
         }
     }
 
+    handleMouseClick() {
+        this.camera.x = this.renderer.mouseTileX;
+        this.camera.y = this.renderer.mouseTileY;
+    }
+
     handleMouseUp() {
         this.mouseDown = false;
     }

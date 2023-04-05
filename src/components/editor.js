@@ -131,11 +131,17 @@ export function Editor() {
                             y / canvasRef.current.clientHeight * canvasRef.current.height, 
                             editMode);
                     }}
-                    onMouseDown={() => {
-                        main?.handleMouseDown(editMode);
+                    onMouseDown={(event) => {
+                        if (event.button === 0) {
+                            main?.handleMouseDown(editMode);
+                        } 
                     }}
-                    onMouseUp={() => {
-                        main?.handleMouseUp();
+                    onMouseUp={(event) => {
+                        if (event.button === 0) {
+                            main?.handleMouseUp();
+                        } else if (event.button === 1) {
+                            main?.handleMouseClick()
+                        }
                     }}
                 ></canvas> 
                 <TileExplorer data={data} handleTileSelection={handleTileSelection} handleObjectSelection={handleObjectSelection} editMode={editMode}/>
