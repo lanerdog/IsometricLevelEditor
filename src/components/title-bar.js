@@ -1,5 +1,5 @@
 import React from "react";
-import { Toolbar, AppBar, IconButton, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
+import { Toolbar, AppBar, IconButton, Menu, MenuItem, Tooltip, Typography, FormControlLabel, Checkbox } from "@mui/material";
 import { LayersClear, RemoveCircle, OpenInBrowser, Menu as MenuIcon, SaveAlt, InsertDriveFile, Help, Texture, CropSquare, Star, SportsScore, Route } from "@mui/icons-material"; 
 
 export function TitleBar(props) {
@@ -95,6 +95,7 @@ export function TitleBar(props) {
                         </IconButton>
                     </Tooltip>
                     <div style={{marginLeft: 'auto'}}>
+                        <FormControlLabel control={<Checkbox checked={props.drawObjects} onChange={() => props.handleDrawObjectsChange()}/>} label="Draw Objects" />
                         <Tooltip title="Draw Passable">
                             <IconButton onClick={() => props.handleEditMode('passable')}>
                                 <CropSquare color={selectedPassing ? 'primary' : 'inherit'}/>

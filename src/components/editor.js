@@ -22,6 +22,7 @@ export function Editor() {
     const [editMode, setEditMode] = useState('none');
     const [newDialogOpen, setNewDialogOpen] = useState(false);
     const [helpDialogOpen, setHelpDialogOpen] = useState(false);
+    const [drawObjects, setDrawObjects] = useState(true);
     let mainCreated = false;
 
     useEffect(() => {
@@ -59,6 +60,11 @@ export function Editor() {
         if (editMode !== setTo) {
             setEditMode(setTo);
         }
+    }
+
+    function handleDrawObjectsChange() {
+        main.drawObjects = !drawObjects;
+        setDrawObjects(!drawObjects);
     }
 
     function handleHelp() {
@@ -110,7 +116,16 @@ export function Editor() {
                 main?.handleKeyUp();
             }}
         >
-            <TitleBar handleEditMode={handleEditMode} handleAStarCalc={handleAStarCalc} handleNew={handleNew} handleLoad={handleLoad} handleSave={handleSave} handleHelp={handleHelp} editMode={editMode}/>
+            <TitleBar 
+                handleEditMode={handleEditMode} 
+                handleAStarCalc={handleAStarCalc} 
+                handleDrawObjectsChange={handleDrawObjectsChange} 
+                handleNew={handleNew} 
+                handleLoad={handleLoad} 
+                handleSave={handleSave} 
+                handleHelp={handleHelp} 
+                editMode={editMode} 
+                drawObjects={drawObjects}/>
             <div style={{display: 'flex', flexDirection: 'row'}}>
                 <canvas style={{minWidth: '82%', maxHeight: '92vh', border:'2px', borderColor:'white'}}
                     

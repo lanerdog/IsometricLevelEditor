@@ -19,6 +19,8 @@ export class Main {
         this.mouseX = 0;
         this.mouseY = 0;
 
+        this.drawObjects = true;
+
         this.aStarPath = [];
 
         const tiles = [];
@@ -107,7 +109,7 @@ export class Main {
     update() {
         this.camera.x += this.cameraMoveX;
         this.camera.y += this.cameraMoveY;
-        this.renderer.draw(this.ctx, this.camera, this.level, this.mouseX, this.mouseY, this.aStarPath, true);
+        this.renderer.draw(this.ctx, this.camera, this.level, this.mouseX, this.mouseY, this.aStarPath, true, this.drawObjects);
     }
 
     placeEdit(editMode) {

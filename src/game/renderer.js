@@ -6,7 +6,7 @@ export class Renderer {
         this.mouseTileY = 0;
     }
 
-    draw(ctx, camera, level, mouseX, mouseY, aStarPath = [], drawNonPassables = false) {
+    draw(ctx, camera, level, mouseX, mouseY, aStarPath = [], drawNonPassables = false, drawObjects = true) {
         //ctx.fillRect(0, ctx.canvas.width, ctx.canvas.height);
         ctx.fillStyle = "#48657D";
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -50,7 +50,7 @@ export class Renderer {
                             }
                         }
                         
-                        if (level.tiles[x][y]?.levelObject) {
+                        if (drawObjects && level.tiles[x][y]?.levelObject) {
                             this.drawGameObject(ctx, level.tiles[x][y].levelObject, tileX, tileY, tileWidth, tileHeight);
                         } 
                     } 
