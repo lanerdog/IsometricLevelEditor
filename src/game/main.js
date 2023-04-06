@@ -1,6 +1,7 @@
 import { Renderer } from './renderer';
 import { Camera } from './camera';
 import { Level } from './level';
+import { aStar } from './astar';
 
 export class Main {
     constructor(ctx, data) {
@@ -17,6 +18,8 @@ export class Main {
 
         this.mouseX = 0;
         this.mouseY = 0;
+
+        this.aStarPath = [];
 
         const tiles = [];
         for(let x = 0; x < 100; x++) {
@@ -52,6 +55,7 @@ export class Main {
         this.level = new Level(tiles);
         this.camera.x = 0;
         this.camera.y = 0;
+        this.clearAStar();
     }
 
     stringifyLevel() {
@@ -85,6 +89,15 @@ export class Main {
         this.level = parsedLevel;
         this.camera.x = 0;
         this.camera.y = 0;
+        this.clearAStar();
+    }
+
+    clearAStar() {
+        this.aStarStartX = undefined;
+        this.aStarStartY = undefined;
+        this.aStarEndX = undefined;
+        this.aStarEndY = undefined;
+        this.aStarPath = [];
     }
 
     start() {
@@ -94,7 +107,7 @@ export class Main {
     update() {
         this.camera.x += this.cameraMoveX;
         this.camera.y += this.cameraMoveY;
-        this.renderer.draw(this.ctx, this.camera, this.level, this.mouseX, this.mouseY, true);
+        this.renderer.draw(this.ctx, this.camera, this.level, this.mouseX, this.mouseY, this.aStarPath, true);
     }
 
     placeEdit(editMode) {
@@ -120,12 +133,33 @@ export class Main {
         } else if (editMode === 'passable') {
             if (mouseTile && !mouseTile.passable) {
                 mouseTile.passable = true;
+                this.aStarPath = [{x: this.aStarStartX, y: this.aStarStartY}, {x: this.aStarEndX, y: this.aStarEndY}];
             }
         } else if (editMode === 'impassable') {
             if (mouseTile && mouseTile.passable) {
                 mouseTile.passable = false;
+                this.aStarPath = [{x: this.aStarStartX, y: this.aStarStartY}, {x: this.aStarEndX, y: this.aStarEndY}];
+            }
+        } else if (editMode === 'start') {
+            if (mouseTile && mouseTile.passable) {
+                this.aStarStartX = this.renderer.mouseTileX;
+                this.aStarStartY = this.renderer.mouseTileY;
+                this.aStarPath = [{x: this.aStarStartX, y: this.aStarStartY}, {x: this.aStarEndX, y: this.aStarEndY}];
+            }
+        } else if (editMode === 'end') {
+            if (mouseTile && mouseTile.passable) {
+                this.aStarEndX = this.renderer.mouseTileX;
+                this.aStarEndY = this.renderer.mouseTileY;
+                this.aStarPath = [{x: this.aStarStartX, y: this.aStarStartY}, {x: this.aStarEndX, y: this.aStarEndY}];
             }
         }
+    }
+
+    calculateAStar() {
+        if (this.aStarEndX !== undefined && this.aStarEndY !== undefined && 
+            this.aStarStartX !== undefined && this.aStarStartY !== undefined) {
+                this.aStarPath = aStar({x: this.aStarStartX, y: this.aStarStartY}, {x: this.aStarEndX, y: this.aStarEndY}, this.level.tiles);
+            }
     }
     
     handleMouseMove(mouseX, mouseY, editMode) {

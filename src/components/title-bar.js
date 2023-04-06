@@ -1,9 +1,11 @@
 import React from "react";
 import { Toolbar, AppBar, IconButton, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
-import { LayersClear, RemoveCircle, OpenInBrowser, Menu as MenuIcon, SaveAlt, InsertDriveFile, Help, Texture, CropSquare } from "@mui/icons-material"; 
+import { LayersClear, RemoveCircle, OpenInBrowser, Menu as MenuIcon, SaveAlt, InsertDriveFile, Help, Texture, CropSquare, Star, SportsScore, Route } from "@mui/icons-material"; 
 
 export function TitleBar(props) {
     const [anchorEl, setAnchorEl] = React.useState(null);
+    let selectedAStarStart = props.editMode.startsWith('start');
+    let selectedAStarEnd = props.editMode.startsWith('end');
     let selectedPassing = props.editMode.startsWith('passable');
     let selectedImpassable = props.editMode.startsWith('impassable');
     let selectedDelete = props.editMode.startsWith('delete') ? props.editMode.split('-')[1] : '';
@@ -77,24 +79,39 @@ export function TitleBar(props) {
                             </div>
                         </MenuItem>
                     </Menu>
+                    <Tooltip title="Place A* Start">
+                        <IconButton onClick={() => props.handleEditMode('start')}>
+                            <Star color={selectedAStarStart ? 'primary' : 'inherit'}/>
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Place A* End">
+                        <IconButton onClick={() => props.handleEditMode('end')}>
+                            <SportsScore color={selectedAStarEnd ? 'primary' : 'inherit'}/>
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Calculate A* Path">
+                        <IconButton onClick={() => props.handleAStarCalc()}>
+                            <Route />
+                        </IconButton>
+                    </Tooltip>
                     <div style={{marginLeft: 'auto'}}>
                         <Tooltip title="Draw Passable">
-                            <IconButton onClick={() => props.handlePassingMode('passable')}>
+                            <IconButton onClick={() => props.handleEditMode('passable')}>
                                 <CropSquare color={selectedPassing ? 'primary' : 'inherit'}/>
                             </IconButton>
                         </Tooltip>
                         <Tooltip title="Draw Impassable">
-                            <IconButton onClick={() => props.handlePassingMode('impassable')}>
+                            <IconButton onClick={() => props.handleEditMode('impassable')}>
                                 <Texture color={selectedImpassable ? 'primary' : 'inherit'}/>
                             </IconButton>
                         </Tooltip>
                         <Tooltip title="Delete Tiles">
-                            <IconButton onClick={() => props.handleDeletionMode('tile')}>
+                            <IconButton onClick={() => props.handleEditMode('delete-tile')}>
                                 <LayersClear color={selectedDelete === 'tile' ? 'primary' : 'inherit'}/>
                             </IconButton>
                         </Tooltip>
                         <Tooltip title="Delete Objects">
-                            <IconButton onClick={() => props.handleDeletionMode('object')}>
+                            <IconButton onClick={() => props.handleEditMode('delete-object')}>
                                 <RemoveCircle color={selectedDelete === 'object' ? 'primary' : 'inherit'}/>
                             </IconButton>
                         </Tooltip>

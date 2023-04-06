@@ -37,14 +37,7 @@ export function Editor() {
         }
     }, []);
 
-    function handleDeletionMode(type) {
-        let setTo = `delete-${type}`;
-        if (editMode !== setTo) {
-            setEditMode(setTo);
-        }
-    }
-
-    function handlePassingMode(mode) {
+    function handleEditMode(mode) {
         if (editMode !== mode) {
             setEditMode(mode);
         }
@@ -55,6 +48,10 @@ export function Editor() {
         if (editMode !== setTo) {
             setEditMode(setTo);
         }
+    }
+
+    function handleAStarCalc() {
+        main?.calculateAStar();
     }
 
     function handleObjectSelection(objectName) {
@@ -113,7 +110,7 @@ export function Editor() {
                 main?.handleKeyUp();
             }}
         >
-            <TitleBar handleDeletionMode={handleDeletionMode} handlePassingMode={handlePassingMode} handleNew={handleNew} handleLoad={handleLoad} handleSave={handleSave} handleHelp={handleHelp} editMode={editMode}/>
+            <TitleBar handleEditMode={handleEditMode} handleAStarCalc={handleAStarCalc} handleNew={handleNew} handleLoad={handleLoad} handleSave={handleSave} handleHelp={handleHelp} editMode={editMode}/>
             <div style={{display: 'flex', flexDirection: 'row'}}>
                 <canvas style={{minWidth: '82%', maxHeight: '92vh', border:'2px', borderColor:'white'}}
                     

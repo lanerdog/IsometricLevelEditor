@@ -38,8 +38,8 @@ export class Data {
         this.animations['empty'] = new Animation('empty', this.textures['empty'], 63, 38, 1, 0, false);
         this.animations['test'] = new Animation('test', this.textures['test'], 63, 38, 1, 0, false);
         this.animations['stone'] = new Animation('stone', this.textures['stone'], 63, 38, 1, 0, false);
-        this.animations['testobject'] = new Animation('testobject', this.textures['testObject'], 89, 100, 1, 0, false);
-        this.animations['testwall'] = new Animation('testwall', this.textures['testWall'], 55, 70, 1, 0, false);
+        this.animations['testobject'] = new Animation('testobject', this.textures['testobject'], 89, 100, 1, 0, false);
+        this.animations['testwall'] = new Animation('testwall', this.textures['testwall'], 55, 70, 1, 0, false);
     }
 
     loadTiles() {
@@ -52,6 +52,6 @@ export class Data {
     loadLevelObjects() {
         this.levelObjects = {};
         this.levelObjects['testobject'] = new LevelObject("TestObject", this.animations['testobject']);
-        this.levelObjects['testwall'] = new LevelObject("Wall", this.animations['testwall']);
+        this.levelObjects['testwall'] = new LevelObject("TestWall", this.animations['testwall']);
     }
 }

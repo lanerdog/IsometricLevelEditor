@@ -6,7 +6,7 @@ export class Renderer {
         this.mouseTileY = 0;
     }
 
-    draw(ctx, camera, level, mouseX, mouseY, drawNonPassables = false) {
+    draw(ctx, camera, level, mouseX, mouseY, aStarPath = [], drawNonPassables = false) {
         //ctx.fillRect(0, ctx.canvas.width, ctx.canvas.height);
         ctx.fillStyle = "#48657D";
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -34,7 +34,15 @@ export class Renderer {
                         (tileBottomX > -1 && tileBottomX < ctx.canvas.width && tileY > -1 && tileY < ctx.canvas.height) || 
                         (tileX > -1 && tileX < ctx.canvas.width && tileBottomY > -1 && tileBottomY < ctx.canvas.height)) {
                         if(level.tiles[x][y]) {
-                            let isMouseInside = this.drawTile(ctx, level.tiles[x][y], Math.floor(tileX), Math.floor(tileY), tileWidth, tileHeight, mouseX, mouseY, drawNonPassables);
+                            let isAStarPath = aStarPath.find((item) => item.x === x && item.y === y) !== undefined;
+                            let isMouseInside = this.drawTile(
+                                ctx, level.tiles[x][y], 
+                                Math.floor(tileX), 
+                                Math.floor(tileY), 
+                                tileWidth, tileHeight, 
+                                mouseX, mouseY, 
+                                isAStarPath, 
+                                drawNonPassables);
                             if (isMouseInside) {
                                 this.mouseTileX = x;
                                 this.mouseTileY = y;
@@ -55,7 +63,7 @@ export class Renderer {
         ctx.fillText(tileText, 20, 20);
     }
 
-    drawTile(ctx, tile, tileX, tileY, tileWidth, tileHeight, mouseX, mouseY, drawNonPassables) {
+    drawTile(ctx, tile, tileX, tileY, tileWidth, tileHeight, mouseX, mouseY, isAStarPath, drawNonPassables) {
         const frameBuffer = tile.activeAnimation.getFrameBuffer();
         let isMouseInside = false;
 
@@ -76,6 +84,10 @@ export class Renderer {
                                 this.screenBuffer.data[bufferSample] = 255;
                                 this.screenBuffer.data[bufferSample + 1] = 0;
                                 this.screenBuffer.data[bufferSample + 2] = 0;
+                            } else if (isAStarPath && x % 3 === 0) {
+                                this.screenBuffer.data[bufferSample] = 0;
+                                this.screenBuffer.data[bufferSample + 1] = 0;
+                                this.screenBuffer.data[bufferSample + 2] = 255;
                             } else {
                                 this.screenBuffer.data[bufferSample] = textureBuffer[textureSample];
                                 this.screenBuffer.data[bufferSample + 1] = textureBuffer[textureSample + 1];
