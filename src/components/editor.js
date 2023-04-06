@@ -128,7 +128,6 @@ export function Editor() {
                 drawObjects={drawObjects}/>
             <div style={{display: 'flex', flexDirection: 'row'}}>
                 <canvas style={{minWidth: '82%', maxHeight: '92vh', border:'2px', borderColor:'white'}}
-                    
                     id='scene' ref={canvasRef}
                     width='640' height='400'
                     onWheel={(event) => {
