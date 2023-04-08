@@ -112,7 +112,7 @@ export class Main {
         this.renderer.draw(this.ctx, this.camera, this.level, this.mouseX, this.mouseY, this.aStarPath, true, this.drawObjects);
     }
 
-    placeEdit(editMode) {
+    placeEdit(editMode, fill = false) {
         let mouseTile = this.level.tiles[this.renderer.mouseTileX][this.renderer.mouseTileY];
         if (editMode.startsWith('object')) {
             let objectName = editMode.split('-')[1].toLowerCase();
@@ -124,7 +124,11 @@ export class Main {
             if (!mouseTile || mouseTile.name.toLowerCase() !== tileName){
                 let newTile = this.data.tiles[tileName].copy();
                 newTile.passable = mouseTile?.passable ?? false;
-                this.level.tiles[this.renderer.mouseTileX][this.renderer.mouseTileY] = newTile;
+                if (!fill) {
+                    this.level.tiles[this.renderer.mouseTileX][this.renderer.mouseTileY] = newTile;
+                } else {
+                    this.fillTile(this.renderer.mouseTileX, this.renderer.mouseTileY, mouseTile, newTile);
+                }                
             }
         } else if (editMode === 'delete-tile') {
             this.level.tiles[this.renderer.mouseTileX][this.renderer.mouseTileY] = this.data.tiles['empty'].copy();
@@ -157,6 +161,19 @@ export class Main {
         }
     }
 
+    fillTile(x, y, currentTile, newTile) {
+        if (x > -1 && x < this.level.tiles.length &&
+            y > -1 && y < this.level.tiles[0].length &&
+            currentTile.name === this.level.tiles[x][y].name) {
+                this.level.tiles[x][y] = newTile;
+
+                this.fillTile(x+1, y, currentTile, newTile.copy());
+                this.fillTile(x-1, y, currentTile, newTile.copy());
+                this.fillTile(x, y+1, currentTile, newTile.copy());
+                this.fillTile(x, y-1, currentTile, newTile.copy());
+            }
+    }
+
     calculateAStar() {
         if (this.aStarEndX !== undefined && this.aStarEndY !== undefined && 
             this.aStarStartX !== undefined && this.aStarStartY !== undefined) {
@@ -182,9 +199,9 @@ export class Main {
         this.camera.zoom += delta;
     }
 
-    handleMouseDown(editMode) {
+    handleMouseDown(editMode, fill = false) {
         if (editMode !== 'none') {
-            this.placeEdit(editMode);
+            this.placeEdit(editMode, fill);
             this.mouseDown = true;
         }
     }
@@ -194,7 +211,10 @@ export class Main {
         this.camera.y = this.renderer.mouseTileY;
     }
 
-    handleMouseUp() {
+    handleMouseUp(editMode, fill) {
+        if (editMode.startsWith('tile') && fill) {
+            this.placeEdit(editMode, fill);
+        }
         this.mouseDown = false;
     }
 

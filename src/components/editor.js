@@ -23,6 +23,7 @@ export function Editor() {
     const [newDialogOpen, setNewDialogOpen] = useState(false);
     const [helpDialogOpen, setHelpDialogOpen] = useState(false);
     const [drawObjects, setDrawObjects] = useState(true);
+    const [fill, setFill] = useState(false);
     let mainCreated = false;
 
     useEffect(() => {
@@ -41,6 +42,7 @@ export function Editor() {
     function handleEditMode(mode) {
         if (editMode !== mode) {
             setEditMode(mode);
+            setFill(false);
         }
     }
 
@@ -59,12 +61,17 @@ export function Editor() {
         let setTo = `object-${objectName}`;
         if (editMode !== setTo) {
             setEditMode(setTo);
+            setFill(false);
         }
     }
 
     function handleDrawObjectsChange() {
         main.drawObjects = !drawObjects;
         setDrawObjects(!drawObjects);
+    }
+
+    function handleFillChange() {
+        setFill(!fill);
     }
 
     function handleHelp() {
@@ -120,12 +127,14 @@ export function Editor() {
                 handleEditMode={handleEditMode} 
                 handleAStarCalc={handleAStarCalc} 
                 handleDrawObjectsChange={handleDrawObjectsChange} 
+                handleFillChange={handleFillChange}
                 handleNew={handleNew} 
                 handleLoad={handleLoad} 
                 handleSave={handleSave} 
                 handleHelp={handleHelp} 
                 editMode={editMode} 
-                drawObjects={drawObjects}/>
+                drawObjects={drawObjects}
+                fill={fill}/>
             <div style={{display: 'flex', flexDirection: 'row'}}>
                 <canvas style={{minWidth: '82%', maxHeight: '92vh', border:'2px', borderColor:'white'}}
                     id='scene' ref={canvasRef}
@@ -143,13 +152,13 @@ export function Editor() {
                             editMode);
                     }}
                     onMouseDown={(event) => {
-                        if (event.button === 0) {
+                        if (event.button === 0 && !fill) {
                             main?.handleMouseDown(editMode);
                         } 
                     }}
                     onMouseUp={(event) => {
                         if (event.button === 0) {
-                            main?.handleMouseUp();
+                            main?.handleMouseUp(editMode, fill);
                         } else if (event.button === 1) {
                             main?.handleMouseClick()
                         }

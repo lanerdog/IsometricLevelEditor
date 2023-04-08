@@ -4,6 +4,7 @@ export class Renderer {
     constructor() {
         this.mouseTileX = 0;
         this.mouseTileY = 0;
+        this.lastDrawTime = 0;
     }
 
     draw(ctx, camera, level, mouseX, mouseY, aStarPath = [], drawNonPassables = false, drawObjects = true) {
@@ -60,7 +61,9 @@ export class Renderer {
         
         ctx.putImageData(this.screenBuffer, 0, 0);
         ctx.fillStyle = "white";
-        ctx.fillText(tileText, 20, 20);
+        ctx.fillText(tileText, 10, 10);
+        ctx.fillText(`${Math.floor(1000 / (Date.now() - this.lastDrawTime))}`, ctx.canvas.width - 20, 10)
+        this.lastDrawTime = Date.now();
     }
 
     drawTile(ctx, tile, tileX, tileY, tileWidth, tileHeight, mouseX, mouseY, isAStarPath, drawNonPassables) {

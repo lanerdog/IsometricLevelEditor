@@ -8,6 +8,7 @@ export function TitleBar(props) {
     let selectedAStarEnd = props.editMode.startsWith('end');
     let selectedPassing = props.editMode.startsWith('passable');
     let selectedImpassable = props.editMode.startsWith('impassable');
+    let selectedTile = props.editMode.startsWith('tile');
     let selectedDelete = props.editMode.startsWith('delete') ? props.editMode.split('-')[1] : '';
 
     function handleOpenMenu(event) {
@@ -95,6 +96,7 @@ export function TitleBar(props) {
                         </IconButton>
                     </Tooltip>
                     <div style={{marginLeft: 'auto'}}>
+                        <FormControlLabel disabled={!selectedTile} control={<Checkbox checked={props.fill} onChange={() => props.handleFillChange()}/>} label="Fill" />
                         <FormControlLabel control={<Checkbox checked={props.drawObjects} onChange={() => props.handleDrawObjectsChange()}/>} label="Draw Objects" />
                         <Tooltip title="Draw Passable">
                             <IconButton onClick={() => props.handleEditMode('passable')}>
@@ -106,14 +108,14 @@ export function TitleBar(props) {
                                 <Texture color={selectedImpassable ? 'primary' : 'inherit'}/>
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title="Delete Tiles">
-                            <IconButton onClick={() => props.handleEditMode('delete-tile')}>
-                                <LayersClear color={selectedDelete === 'tile' ? 'primary' : 'inherit'}/>
-                            </IconButton>
-                        </Tooltip>
                         <Tooltip title="Delete Objects">
                             <IconButton onClick={() => props.handleEditMode('delete-object')}>
                                 <RemoveCircle color={selectedDelete === 'object' ? 'primary' : 'inherit'}/>
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete Tiles">
+                            <IconButton onClick={() => props.handleEditMode('delete-tile')}>
+                                <LayersClear color={selectedDelete === 'tile' ? 'primary' : 'inherit'}/>
                             </IconButton>
                         </Tooltip>
                     </div>
