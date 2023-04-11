@@ -120,12 +120,14 @@ export function Editor() {
     }
 
     function addUndo() {
-        undoBackups.push(main.level.copy());
-        if (undoBackups.length > 6) {
-            undoBackups.shift();
-        }
-        setUndoBackups(undoBackups);
-        setCanUndo(undoBackups.length > 1);
+        if (editMode !== 'start' && editMode !== 'end') {
+            undoBackups.push(main.level.copy());
+            if (undoBackups.length > 6) {
+                undoBackups.shift();
+            }
+            setUndoBackups(undoBackups);
+            setCanUndo(undoBackups.length > 1);
+        }        
     }
 
     function handleUndo() {
