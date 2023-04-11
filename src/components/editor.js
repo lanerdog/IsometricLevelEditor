@@ -24,6 +24,8 @@ export function Editor() {
     const [helpDialogOpen, setHelpDialogOpen] = useState(false);
     const [drawObjects, setDrawObjects] = useState(true);
     const [fill, setFill] = useState(false);
+    const [undoBackups, setUndoBackups] = useState([]);
+    const [canUndo, setCanUndo] = useState(false);
     let mainCreated = false;
 
     useEffect(() => {
@@ -35,6 +37,7 @@ export function Editor() {
             newMain.start();
             setData(newData);
             setMain(newMain);
+            setUndoBackups([newMain.level.copy()]);
             mainCreated = true;
         }
     }, []);
@@ -93,6 +96,8 @@ export function Editor() {
     function handleCreateNewMap(width, height) {
         main?.createNewLevel(width, height);
         setNewDialogOpen(false);
+        setUndoBackups([main.level.copy()]);
+        setCanUndo(false);
     }
 
     function handleLoad() {
@@ -114,6 +119,24 @@ export function Editor() {
         }
     }
 
+    function addUndo() {
+        undoBackups.push(main.level.copy());
+        if (undoBackups.length > 6) {
+            undoBackups.shift();
+        }
+        setUndoBackups(undoBackups);
+        setCanUndo(undoBackups.length > 1);
+    }
+
+    function handleUndo() {
+        if (undoBackups.length > 1) {
+            main.level = undoBackups[undoBackups.length - 2];
+            undoBackups.pop();
+            setUndoBackups(undoBackups);
+            setCanUndo(undoBackups.length > 1);
+        }
+    }
+
     return (
         <div tabIndex="0"
             onKeyDown={(event) => {
@@ -132,6 +155,8 @@ export function Editor() {
                 handleLoad={handleLoad} 
                 handleSave={handleSave} 
                 handleHelp={handleHelp} 
+                handleUndo={handleUndo}
+                canUndo={canUndo}
                 editMode={editMode} 
                 drawObjects={drawObjects}
                 fill={fill}/>
@@ -159,8 +184,9 @@ export function Editor() {
                     onMouseUp={(event) => {
                         if (event.button === 0) {
                             main?.handleMouseUp(editMode, fill);
+                            addUndo();
                         } else if (event.button === 1) {
-                            main?.handleMouseClick()
+                            main?.handleMouseClick();
                         }
                     }}
                 ></canvas> 

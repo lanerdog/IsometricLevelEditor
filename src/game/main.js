@@ -201,6 +201,7 @@ export class Main {
 
     handleMouseDown(editMode, fill = false) {
         if (editMode !== 'none') {
+            this.level = this.level.copy();
             this.placeEdit(editMode, fill);
             this.mouseDown = true;
         }

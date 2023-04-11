@@ -1,6 +1,6 @@
 import React from "react";
-import { Toolbar, AppBar, IconButton, Menu, MenuItem, Tooltip, Typography, FormControlLabel, Checkbox } from "@mui/material";
-import { LayersClear, RemoveCircle, OpenInBrowser, Menu as MenuIcon, SaveAlt, InsertDriveFile, Help, Texture, CropSquare, Star, SportsScore, Route } from "@mui/icons-material"; 
+import { Toolbar, AppBar, IconButton, Menu, MenuItem, Tooltip, Typography, FormControlLabel, Checkbox, Divider } from "@mui/material";
+import { LayersClear, RemoveCircle, OpenInBrowser, Menu as MenuIcon, SaveAlt, InsertDriveFile, Help, Texture, CropSquare, Star, SportsScore, Route, Undo } from "@mui/icons-material"; 
 
 export function TitleBar(props) {
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -93,6 +93,12 @@ export function TitleBar(props) {
                     <Tooltip title="Calculate A* Path">
                         <IconButton onClick={() => props.handleAStarCalc()}>
                             <Route />
+                        </IconButton>
+                    </Tooltip>
+                    <Divider orientation="vertical" variant="middle" flexItem style={{marginLeft: 20, marginRight: 20}}></Divider>
+                    <Tooltip title="Undo">
+                        <IconButton disabled={!props.canUndo} onClick={() => props.handleUndo()}>
+                            <Undo />
                         </IconButton>
                     </Tooltip>
                     <div style={{marginLeft: 'auto'}}>
