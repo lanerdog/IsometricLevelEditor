@@ -134,6 +134,7 @@ export function Editor() {
             undoBackups.pop();
             setUndoBackups(undoBackups);
             setCanUndo(undoBackups.length > 1);
+            main.clearAStar();
         }
     }
 
