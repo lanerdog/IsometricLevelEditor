@@ -20,6 +20,8 @@ export class Renderer {
         let tileText = "";
         let extraCameraSpace = Math.ceil(camera.zoom / 10 * 2.6);
 
+        let tilesToDraw = [];
+
         for(let x = startX + camera.zoom * 2 + 5; x > startX - extraCameraSpace; x--) {
             for (let y = startY - 5; y < startY + camera.zoom * 2 + extraCameraSpace; y++) {
                 if (x > -1 && x < level.tiles.length && y > -1 && y < level.tiles[x].length) {
@@ -35,20 +37,13 @@ export class Renderer {
                         (tileBottomX > -1 && tileBottomX < ctx.canvas.width && tileY > -1 && tileY < ctx.canvas.height) || 
                         (tileX > -1 && tileX < ctx.canvas.width && tileBottomY > -1 && tileBottomY < ctx.canvas.height)) {
                         if(level.tiles[x][y]) {
-                            let isAStarPath = aStarPath.find((item) => item.x === x && item.y === y) !== undefined;
-                            let isMouseInside = this.drawTile(
-                                ctx, level.tiles[x][y], 
-                                Math.floor(tileX), 
-                                Math.floor(tileY), 
-                                tileWidth, tileHeight, 
-                                mouseX, mouseY, 
-                                isAStarPath, 
-                                drawNonPassables);
-                            if (isMouseInside) {
-                                this.mouseTileX = x;
-                                this.mouseTileY = y;
-                                tileText = `X: ${x} , Y: ${y}, Zoom: ${camera.zoom}`;
-                            }
+                            tilesToDraw.unshift({
+                                tile: level.tiles[x][y],
+                                tileX: tileX,
+                                tileY: tileY,
+                                x: x,
+                                y: y                                
+                            });
                         }
                         
                         if (drawObjects && level.tiles[x][y]?.levelObject) {
@@ -56,6 +51,23 @@ export class Renderer {
                         } 
                     } 
                 }
+            }
+        }
+
+        for (let t = 0; t < tilesToDraw.length; t++) {
+            let isAStarPath = aStarPath.find((item) => item.x === x && item.y === y) !== undefined;
+            let isMouseInside = this.drawTile(
+                ctx, tilesToDraw[t].tile, 
+                Math.floor(tilesToDraw[t].tileX), 
+                Math.floor(tilesToDraw[t].tileY), 
+                tileWidth, tileHeight, 
+                mouseX, mouseY, 
+                isAStarPath, 
+                drawNonPassables);
+            if (isMouseInside) {
+                this.mouseTileX = tilesToDraw[t].x;
+                this.mouseTileY = tilesToDraw[t].y;
+                tileText = `X: ${this.mouseTileX} , Y: ${this.mouseTileY}, Zoom: ${camera.zoom}`;
             }
         }
         
@@ -74,30 +86,33 @@ export class Renderer {
             for (let y = tileY; y < tileY + tileHeight; y++) {
                 if (x > -1 && x < ctx.canvas.width &&
                     y > -1 && y < ctx.canvas.height) {
-                        let xTextureSample = Math.floor(((x - tileX) / tileWidth) * TILE_WIDTH);
-                        let yTextureSample = Math.floor(((y - tileY) / tileHeight) * TILE_HEIGHT);
-                        let textureSample = 4 * (yTextureSample * TILE_WIDTH + xTextureSample);
                         let bufferSample = 4 * (y * this.screenBuffer.width + x);
-                        let textureBuffer = frameBuffer.data;
-                        if (textureBuffer[textureSample + 3] === 255 && textureBuffer[textureSample] !== undefined) {
-                            if (!isMouseInside && (4 * (mouseY * this.screenBuffer.width + mouseX)) === bufferSample) {
-                                isMouseInside = true;
+                        //first check that the buffer sample hasn't had an item drawn on it yet
+                        if (this.screenBuffer.data[bufferSample] === 72 && this.screenBuffer.data[bufferSample + 1] === 101 && this.screenBuffer.data[bufferSample + 2] === 125) {
+                            let xTextureSample = Math.floor(((x - tileX) / tileWidth) * TILE_WIDTH);
+                            let yTextureSample = Math.floor(((y - tileY) / tileHeight) * TILE_HEIGHT);
+                            let textureSample = 4 * (yTextureSample * TILE_WIDTH + xTextureSample);
+                            let textureBuffer = frameBuffer.data;
+                            if (textureBuffer[textureSample + 3] === 255 && textureBuffer[textureSample] !== undefined) {
+                                if (!isMouseInside && (4 * (mouseY * this.screenBuffer.width + mouseX)) === bufferSample) {
+                                    isMouseInside = true;
+                                }
+                                if (drawNonPassables && !tile.passable && x % 3 === 0) {
+                                    this.screenBuffer.data[bufferSample] = 255;
+                                    this.screenBuffer.data[bufferSample + 1] = 0;
+                                    this.screenBuffer.data[bufferSample + 2] = 0;
+                                } else if (isAStarPath && x % 3 === 0) {
+                                    this.screenBuffer.data[bufferSample] = 0;
+                                    this.screenBuffer.data[bufferSample + 1] = 0;
+                                    this.screenBuffer.data[bufferSample + 2] = 255;
+                                } else {
+                                    this.screenBuffer.data[bufferSample] = textureBuffer[textureSample];
+                                    this.screenBuffer.data[bufferSample + 1] = textureBuffer[textureSample + 1];
+                                    this.screenBuffer.data[bufferSample + 2] = textureBuffer[textureSample + 2];
+                                }                            
+                                
+                                this.screenBuffer.data[bufferSample + 3] = 255;
                             }
-                            if (drawNonPassables && !tile.passable && x % 3 === 0) {
-                                this.screenBuffer.data[bufferSample] = 255;
-                                this.screenBuffer.data[bufferSample + 1] = 0;
-                                this.screenBuffer.data[bufferSample + 2] = 0;
-                            } else if (isAStarPath && x % 3 === 0) {
-                                this.screenBuffer.data[bufferSample] = 0;
-                                this.screenBuffer.data[bufferSample + 1] = 0;
-                                this.screenBuffer.data[bufferSample + 2] = 255;
-                            } else {
-                                this.screenBuffer.data[bufferSample] = textureBuffer[textureSample];
-                                this.screenBuffer.data[bufferSample + 1] = textureBuffer[textureSample + 1];
-                                this.screenBuffer.data[bufferSample + 2] = textureBuffer[textureSample + 2];
-                            }                            
-                            
-                            this.screenBuffer.data[bufferSample + 3] = 255;
                         }
                     }
             }
@@ -118,7 +133,7 @@ export class Renderer {
         for (let x = startX; x < startX + zoomWidth; x++) {
             for (let y = startY; y < startY + zoomHeight; y++) {
                 if (x > -1 && x < ctx.canvas.width &&
-                    y > -1 && y < ctx.canvas.width) {
+                    y > -1 && y < ctx.canvas.height) {
                         let xTextureSample = Math.floor(((x - startX) / zoomWidth) * frameBuffer.width);
                         let yTextureSample = Math.floor(((y - startY) / zoomHeight) * frameBuffer.height);
                         let textureSample = 4 * (yTextureSample * frameBuffer.width + xTextureSample);

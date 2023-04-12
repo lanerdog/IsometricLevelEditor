@@ -58,13 +58,20 @@ export class Data {
         this.animations['sandwatercorner_s'] = new Animation('sandwatercorner_s', this.textures['sandwatercorner_s'], 63, 38, 2, 2000, true);
         this.animations['sandwatercorner_e'] = new Animation('sandwatercorner_e', this.textures['sandwatercorner_e'], 63, 38, 2, 2000, true);
         this.animations['sandwatercorner_w'] = new Animation('sandwatercorner_w', this.textures['sandwatercorner_w'], 63, 38, 2, 2000, true);
+        this.animations['sandwaterwedge_e'] = new Animation('sandwaterwedge_e', this.textures['sandwaterwedge_e'], 63, 38, 2, 2000, true);
+        this.animations['sandwaterwedge_w'] = new Animation('sandwaterwedge_w', this.textures['sandwaterwedge_w'], 63, 38, 2, 2000, true);
 
         //objects
         this.animations['testobject'] = new Animation('testobject', this.textures['testobject'], 89, 100, 1, 0, false);
         this.animations['testwall'] = new Animation('testwall', this.textures['testwall'], 55, 70, 1, 0, false);
         this.animations['palmtree1'] = new Animation('palmtree1', this.textures['palmtree1'], 67, 157, 1, 0, false);
+        this.animations['palmtree2'] = new Animation('palmtree2', this.textures['palmtree2'], 101, 143, 1, 0, false);
         this.animations['bush1'] = new Animation('bush1', this.textures['bush1'], 75, 47, 1, 0, false);
         this.animations['rock1'] = new Animation('rock1', this.textures['rock1'], 49, 55, 1, 0, false);
+        this.animations['fern1'] = new Animation('fern1', this.textures['fern1'], 16, 51, 1, 0, false);
+        this.animations['fern2'] = new Animation('fern2', this.textures['fern2'], 29, 31, 1, 0, false);
+        this.animations['fern3'] = new Animation('fern3', this.textures['fern3'], 36, 51, 1, 0, false);
+        this.animations['wave1'] = new Animation('wave1', this.textures['wave1'], 166, 19, 4, 2000, true);
         this.animations['kamehouse'] = new Animation('kamehouse', this.textures['kamehouse'], 192, 202, 1, 0, false);
 
         Object.keys(this.animations).forEach(key => { this.animations[key].start(); });
@@ -93,6 +100,8 @@ export class Data {
         this.tiles['sandwatercorner_s'] = new Tile("SandWaterCorner_S", this.animations['sandwatercorner_s'], true);
         this.tiles['sandwatercorner_w'] = new Tile("SandWaterCorner_W", this.animations['sandwatercorner_w'], true);
         this.tiles['sandwatercorner_e'] = new Tile("SandWaterCorner_E", this.animations['sandwatercorner_e'], true);
+        this.tiles['sandwaterwedge_w'] = new Tile("SandWaterWedge_W", this.animations['sandwaterwedge_w'], true);
+        this.tiles['sandwaterwedge_e'] = new Tile("SandWaterWedge_E", this.animations['sandwaterwedge_e'], true);
     }
 
     loadLevelObjects() {
@@ -100,8 +109,13 @@ export class Data {
         this.levelObjects['testobject'] = new LevelObject("TestObject", this.animations['testobject']);
         this.levelObjects['testwall'] = new LevelObject("TestWall", this.animations['testwall']);
         this.levelObjects['palmtree1'] = new LevelObject("PalmTree1", this.animations['palmtree1']);
+        this.levelObjects['palmtree2'] = new LevelObject("PalmTree2", this.animations['palmtree2']);
         this.levelObjects['bush1'] = new LevelObject("Bush1", this.animations['bush1']);
         this.levelObjects['rock1'] = new LevelObject("Rock1", this.animations['rock1']);
+        this.levelObjects['wave1'] = new LevelObject("Wave1", this.animations['wave1']);
+        this.levelObjects['fern1'] = new LevelObject("Fern1", this.animations['fern1']);
+        this.levelObjects['fern2'] = new LevelObject("Fern2", this.animations['fern2']);
+        this.levelObjects['fern3'] = new LevelObject("Fern3", this.animations['fern3']);
         this.levelObjects['kamehouse'] = new LevelObject("KameHouse", this.animations['kamehouse']);
     }
 }
