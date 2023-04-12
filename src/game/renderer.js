@@ -110,7 +110,7 @@ export class Renderer {
         const frameBuffer = levelObject.activeAnimation.getFrameBuffer();
         //get scaled width/height
         let zoomWidth = Math.floor(frameBuffer.width * tileWidth / TILE_WIDTH);
-        let zoomHeight = Math.floor(frameBuffer.width * tileHeight / TILE_HEIGHT); 
+        let zoomHeight = Math.floor(frameBuffer.height * tileHeight / TILE_HEIGHT); 
 
         let startX = Math.floor(tileX + tileWidth/2 - zoomWidth/2);
         let startY = Math.floor(tileY + tileHeight - zoomHeight);

@@ -1,4 +1,4 @@
-import { List, ListItemText, ListItemButton, Tabs, Tab, Box, ListItemAvatar } from "@mui/material";
+import { List, ListItemText, ListItemButton, Tabs, Tab, Box, ListItemAvatar, Paper } from "@mui/material";
 import React, { useState } from "react";
 
 function TabPanel(props) {
@@ -30,13 +30,13 @@ export function TileExplorer(props) {
     }
 
     return(
-        <div style={{minWidth: '320px', minHeight: '100%'}}>
+        <div>
             <Tabs value={value} onChange={(event, newValue) => handleTabChange(newValue)}>
                 <Tab label="Tiles" id="tab-0"/>
                 <Tab label="Objects" id="tab-1"/>
             </Tabs>
             <TabPanel value={value} index={0}>
-                <List>
+                <List style={{minWidth: '290px', maxHeight:'80vh', overflow: 'auto'}}>
                     {props.data ? 
                         Object.entries(props.data.tiles).map(([key, value]) =>
                             {
@@ -50,7 +50,7 @@ export function TileExplorer(props) {
                 </List>
             </TabPanel>
             <TabPanel value={value} index={1}>
-                <List>
+                <List style={{minWidth: '290px', maxHeight:'80vh', overflow: 'auto'}}>
                     {props.data ?
                         Object.entries(props.data.levelObjects).map(([key, value]) =>
                         {

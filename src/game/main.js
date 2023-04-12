@@ -2,6 +2,8 @@ import { Renderer } from './renderer';
 import { Camera } from './camera';
 import { Level } from './level';
 import { aStar } from './astar';
+import { Tile } from './tile';
+import { LevelObject } from './level-object';
 
 export class Main {
     constructor(ctx, data) {
@@ -29,7 +31,7 @@ export class Main {
             for(let y = 0; y < 100; y++) {
                 let tileType = Math.random();
                 if (tileType > 0.2) {
-                    tiles[x].push(this.data.tiles['test'].copy());
+                    tiles[x].push(this.data.tiles['grass'].copy());
                     if (Math.random() > 0.9) {
                         tiles[x][y].levelObject = this.data.levelObjects['testobject'].copy();
                     }
@@ -84,11 +86,14 @@ export class Main {
                 parsedLevel.tiles[x][y].activeAnimation = this.data.animations[parsedLevel.tiles[x][y].activeAnimation];
                 if (parsedLevel.tiles[x][y].levelObject) {
                     parsedLevel.tiles[x][y].levelObject.activeAnimation = this.data.animations[parsedLevel.tiles[x][y].levelObject.activeAnimation];
+                    Object.setPrototypeOf(parsedLevel.tiles[x][y].levelObject, LevelObject.prototype);
                 }
+
+                Object.setPrototypeOf(parsedLevel.tiles[x][y], Tile.prototype);
             }
         }
 
-        this.level = parsedLevel;
+        this.level = Object.setPrototypeOf(parsedLevel, Level.prototype);
         this.camera.x = 0;
         this.camera.y = 0;
         this.clearAStar();
