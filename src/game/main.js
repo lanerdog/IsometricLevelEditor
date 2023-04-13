@@ -135,6 +135,7 @@ export class Main {
                 newTile.passable = mouseTile?.passable ?? false;
                 if (!fill) {
                     this.level.tiles[this.renderer.mouseTileX][this.renderer.mouseTileY] = newTile;
+                    this.level.tiles[this.renderer.mouseTileX][this.renderer.mouseTileY].lightCoefficient = mouseTile.lightCoefficient;
                 } else {
                     this.fillTile(this.renderer.mouseTileX, this.renderer.mouseTileY, mouseTile, newTile);
                 }                
@@ -227,7 +228,9 @@ export class Main {
         if (x > -1 && x < this.level.tiles.length &&
             y > -1 && y < this.level.tiles[0].length &&
             currentTile.name === this.level.tiles[x][y].name) {
+                let currentLightCoefficient = this.level.tiles[x][y].lightCoefficient;
                 this.level.tiles[x][y] = newTile;
+                this.level.tiles[x][y].lightCoefficient = currentLightCoefficient;
 
                 this.fillTile(x+1, y, currentTile, newTile.copy());
                 this.fillTile(x-1, y, currentTile, newTile.copy());
