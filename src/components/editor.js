@@ -26,6 +26,7 @@ export function Editor() {
     const [fill, setFill] = useState(false);
     const [undoBackups, setUndoBackups] = useState([]);
     const [canUndo, setCanUndo] = useState(false);
+    const [ambientColor, setAmbientColor] = useState("#FFFFFF");
     let mainCreated = false;
 
     useEffect(() => {
@@ -98,6 +99,7 @@ export function Editor() {
         setNewDialogOpen(false);
         setUndoBackups([main.level.copy()]);
         setCanUndo(false);
+        handleAmbientColorChange("#FFFFFF");
     }
 
     function handleLoad() {
@@ -108,6 +110,8 @@ export function Editor() {
         let reader = new FileReader();
         reader.onload = function(event) {
             main?.destringifyAndLoadLevel(event.target.result);
+            handleAmbientColorChange(main.level.ambientLight);
+            setUndoBackups([main.level.copy()]);
         }
         reader.readAsText(file);
     }
@@ -133,11 +137,17 @@ export function Editor() {
     function handleUndo() {
         if (undoBackups.length > 1) {
             main.level = undoBackups[undoBackups.length - 2];
+            handleAmbientColorChange(main.level.ambientLight);
             undoBackups.pop();
             setUndoBackups(undoBackups);
             setCanUndo(undoBackups.length > 1);
             main.clearAStar();
         }
+    }
+
+    function handleAmbientColorChange(newValue) {
+        setAmbientColor(newValue);
+        main.level.ambientLight = newValue;
     }
 
     return (
@@ -159,6 +169,8 @@ export function Editor() {
                 handleSave={handleSave} 
                 handleHelp={handleHelp} 
                 handleUndo={handleUndo}
+                ambientColor={ambientColor}
+                handleAmbientColorChange={handleAmbientColorChange}
                 canUndo={canUndo}
                 editMode={editMode} 
                 drawObjects={drawObjects}

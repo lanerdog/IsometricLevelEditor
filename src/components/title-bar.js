@@ -1,6 +1,6 @@
 import React from "react";
-import { Toolbar, AppBar, IconButton, Menu, MenuItem, Tooltip, Typography, FormControlLabel, Checkbox, Divider } from "@mui/material";
-import { LayersClear, RemoveCircle, OpenInBrowser, Menu as MenuIcon, SaveAlt, InsertDriveFile, Help, Texture, CropSquare, Star, SportsScore, Route, Undo } from "@mui/icons-material"; 
+import { Toolbar, AppBar, IconButton, Menu, MenuItem, Tooltip, Typography, FormControlLabel, Checkbox, Divider, TextField } from "@mui/material";
+import { LayersClear, RemoveCircle, OpenInBrowser, Menu as MenuIcon, SaveAlt, InsertDriveFile, Help, Texture, CropSquare, Star, SportsScore, Route, Undo, Lightbulb } from "@mui/icons-material"; 
 
 export function TitleBar(props) {
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -9,6 +9,7 @@ export function TitleBar(props) {
     let selectedPassing = props.editMode.startsWith('passable');
     let selectedImpassable = props.editMode.startsWith('impassable');
     let selectedTile = props.editMode.startsWith('tile');
+    let selectedLight = props.editMode.startsWith('light');
     let selectedDelete = props.editMode.startsWith('delete') ? props.editMode.split('-')[1] : '';
 
     function handleOpenMenu(event) {
@@ -102,6 +103,18 @@ export function TitleBar(props) {
                         </IconButton>
                     </Tooltip>
                     <div style={{marginLeft: 'auto'}}>
+                        <Tooltip title="Draw Light">
+                            <IconButton onClick={() => props.handleEditMode('light')}>
+                                <Lightbulb color={selectedLight ? 'primary' : 'inherit'}/>
+                            </IconButton>
+                        </Tooltip>
+                        <TextField 
+                            value={props.ambientColor} 
+                            onChange={(event) => props.handleAmbientColorChange(event.target.value)} 
+                            label="Ambient Light" 
+                            style={{width: '120px', height: '30px', marginRight: 10, marginLeft: 10}}
+                            inputProps={{style: {padding: 10}}}
+                        />
                         <FormControlLabel disabled={!selectedTile} control={<Checkbox checked={props.fill} onChange={() => props.handleFillChange()}/>} label="Fill" />
                         <FormControlLabel control={<Checkbox checked={props.drawObjects} onChange={() => props.handleDrawObjectsChange()}/>} label="Draw Objects" />
                         <Tooltip title="Draw Passable">

@@ -57,6 +57,7 @@ export class Main {
             }
         }
         this.level = new Level(tiles);
+        this.level.ambientLight = "#FFFFFF";
         this.camera.x = 0;
         this.camera.y = 0;
         this.clearAStar();
@@ -76,7 +77,10 @@ export class Main {
             }
         }
 
-        return JSON.stringify(new Level(tiles));
+        const returnValue = new Level(tiles);
+        returnValue.ambientLight = this.level.ambientLight;
+
+        return JSON.stringify(returnValue);
     }
 
     destringifyAndLoadLevel(json) {
@@ -114,7 +118,7 @@ export class Main {
     update() {
         this.camera.x += this.cameraMoveX;
         this.camera.y += this.cameraMoveY;
-        this.renderer.draw(this.ctx, this.camera, this.level, this.mouseX, this.mouseY, this.aStarPath, true, this.drawObjects);
+        this.renderer.draw(this.ctx, this.camera, this.level, this.mouseX, this.mouseY, this.aStarPath, true, true, this.drawObjects);
     }
 
     placeEdit(editMode, fill = false) {
@@ -162,6 +166,59 @@ export class Main {
                 this.aStarEndX = this.renderer.mouseTileX;
                 this.aStarEndY = this.renderer.mouseTileY;
                 this.aStarPath = [{x: this.aStarStartX, y: this.aStarStartY}, {x: this.aStarEndX, y: this.aStarEndY}];
+            }
+        } 
+    }
+
+    placeLight() {
+        let mouseTile = this.level.tiles[this.renderer.mouseTileX][this.renderer.mouseTileY];
+        //first set origin to 0
+        if (mouseTile) {
+            if (mouseTile.lightCoefficient === 0) {
+                mouseTile.lightCoefficient = 1;
+            } else {
+                mouseTile.lightCoefficient = 0;
+            }                
+
+            this.recalculateLightCoefficients();
+        }
+    }
+
+    recalculateLightCoefficients() {
+        //set all tiles to 1 for those that are not set to 0 first
+        for (let x = 0; x < this.level.tiles.length; x++) {
+            for (let y = 0; y < this.level.tiles[x].length; y++){
+                if (this.level.tiles[x][y].lightCoefficient > 0) {
+                    this.level.tiles[x][y].lightCoefficient = 1;
+                }
+            }
+        }
+
+        for (let x = 0; x < this.level.tiles.length; x++) {
+            for (let y = 0; y < this.level.tiles[x].length; y++){
+                if (this.level.tiles[x][y].lightCoefficient === 0) {
+                    let startX = x - 5;
+                    let startY = y - 5;
+                    let endX = startX + 10;
+                    let endY = startY + 10;
+                    for (let lx = startX; lx < endX; lx++) {
+                        for (let ly = startY; ly < endY; ly++) {
+                            if (lx > -1 && lx < this.level.tiles.length && ly > -1 && ly < this.level.tiles[lx].length && this.level.tiles[lx][ly].lightCoefficient !== 0) {
+                                let distanceFromOrigin = Math.sqrt(Math.pow(lx - x, 2) + Math.pow(ly - y, 2));
+                                if (distanceFromOrigin <= 5) {
+                                    let newLightCoefficient = this.level.tiles[lx][ly].lightCoefficient - (1 - distanceFromOrigin / 5 + 0.2);
+
+                                    if (newLightCoefficient > 1) {
+                                        newLightCoefficient = 1;
+                                    } else if (newLightCoefficient < 0.01) {
+                                        newLightCoefficient = 0.01;
+                                    }
+                                    this.level.tiles[lx][ly].lightCoefficient = newLightCoefficient;
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -220,6 +277,8 @@ export class Main {
     handleMouseUp(editMode, fill) {
         if (editMode.startsWith('tile') && fill) {
             this.placeEdit(editMode, fill);
+        } else if (editMode === 'light') {
+            this.placeLight();
         }
         this.mouseDown = false;
     }

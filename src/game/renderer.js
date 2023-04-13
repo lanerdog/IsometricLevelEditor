@@ -1,13 +1,16 @@
-import { TILE_WIDTH, TILE_HEIGHT, TILE_HEIGHT_OFFSET_RATIO } from './constants';
+import { TILE_WIDTH, TILE_HEIGHT, TILE_HEIGHT_OFFSET_RATIO, hexToRgbOffset } from './constants';
 
 export class Renderer {
     constructor() {
         this.mouseTileX = 0;
         this.mouseTileY = 0;
         this.lastDrawTime = 0;
+
+        this.backgroundColor = "#48657D";
+        this.backgroundRgb = {r: 72, g: 101, b: 125};
     }
 
-    draw(ctx, camera, level, mouseX, mouseY, aStarPath = [], drawNonPassables = false, drawObjects = true) {
+    draw(ctx, camera, level, mouseX, mouseY, aStarPath = [], drawNonPassables = false, drawLightSources = false, drawObjects = true) {
         //ctx.fillRect(0, ctx.canvas.width, ctx.canvas.height);
         ctx.fillStyle = "#48657D";
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -21,6 +24,8 @@ export class Renderer {
         let extraCameraSpace = Math.ceil(camera.zoom / 10 * 2.6);
 
         let tilesToDraw = [];
+
+        let ambientRgb = hexToRgbOffset(level.ambientLight);
 
         for(let x = startX + camera.zoom * 2 + 5; x > startX - extraCameraSpace; x--) {
             for (let y = startY - 5; y < startY + camera.zoom * 2 + extraCameraSpace; y++) {
@@ -47,7 +52,7 @@ export class Renderer {
                         }
                         
                         if (drawObjects && level.tiles[x][y]?.levelObject) {
-                            this.drawGameObject(ctx, level.tiles[x][y].levelObject, tileX, tileY, tileWidth, tileHeight);
+                            this.drawGameObject(ctx, level.tiles[x][y], tileX, tileY, tileWidth, tileHeight, ambientRgb);
                         } 
                     } 
                 }
@@ -55,7 +60,7 @@ export class Renderer {
         }
 
         for (let t = 0; t < tilesToDraw.length; t++) {
-            let isAStarPath = aStarPath.find((item) => item.x === x && item.y === y) !== undefined;
+            let isAStarPath = aStarPath.find((item) => item.x === tilesToDraw[t].x && item.y === tilesToDraw[t].y) !== undefined;
             let isMouseInside = this.drawTile(
                 ctx, tilesToDraw[t].tile, 
                 Math.floor(tilesToDraw[t].tileX), 
@@ -63,7 +68,9 @@ export class Renderer {
                 tileWidth, tileHeight, 
                 mouseX, mouseY, 
                 isAStarPath, 
-                drawNonPassables);
+                drawNonPassables,
+                drawLightSources,
+                ambientRgb);
             if (isMouseInside) {
                 this.mouseTileX = tilesToDraw[t].x;
                 this.mouseTileY = tilesToDraw[t].y;
@@ -78,7 +85,7 @@ export class Renderer {
         this.lastDrawTime = Date.now();
     }
 
-    drawTile(ctx, tile, tileX, tileY, tileWidth, tileHeight, mouseX, mouseY, isAStarPath, drawNonPassables) {
+    drawTile(ctx, tile, tileX, tileY, tileWidth, tileHeight, mouseX, mouseY, isAStarPath, drawNonPassables, drawLightSources, ambientRgb) {
         const frameBuffer = tile.activeAnimation.getFrameBuffer();
         let isMouseInside = false;
 
@@ -88,7 +95,7 @@ export class Renderer {
                     y > -1 && y < ctx.canvas.height) {
                         let bufferSample = 4 * (y * this.screenBuffer.width + x);
                         //first check that the buffer sample hasn't had an item drawn on it yet
-                        if (this.screenBuffer.data[bufferSample] === 72 && this.screenBuffer.data[bufferSample + 1] === 101 && this.screenBuffer.data[bufferSample + 2] === 125) {
+                        if (this.screenBuffer.data[bufferSample] === this.backgroundRgb.r && this.screenBuffer.data[bufferSample + 1] === this.backgroundRgb.g && this.screenBuffer.data[bufferSample + 2] === this.backgroundRgb.b) {
                             let xTextureSample = Math.floor(((x - tileX) / tileWidth) * TILE_WIDTH);
                             let yTextureSample = Math.floor(((y - tileY) / tileHeight) * TILE_HEIGHT);
                             let textureSample = 4 * (yTextureSample * TILE_WIDTH + xTextureSample);
@@ -106,10 +113,16 @@ export class Renderer {
                                     this.screenBuffer.data[bufferSample + 1] = 0;
                                     this.screenBuffer.data[bufferSample + 2] = 255;
                                 } else {
-                                    this.screenBuffer.data[bufferSample] = textureBuffer[textureSample];
-                                    this.screenBuffer.data[bufferSample + 1] = textureBuffer[textureSample + 1];
-                                    this.screenBuffer.data[bufferSample + 2] = textureBuffer[textureSample + 2];
-                                }                            
+                                    this.screenBuffer.data[bufferSample] = textureBuffer[textureSample] + tile.lightCoefficient * ambientRgb.r;
+                                    this.screenBuffer.data[bufferSample + 1] = textureBuffer[textureSample + 1] + tile.lightCoefficient * ambientRgb.g;
+                                    this.screenBuffer.data[bufferSample + 2] = textureBuffer[textureSample + 2] + tile.lightCoefficient * ambientRgb.b;
+                                }
+                                
+                                if (drawLightSources && tile.lightCoefficient === 0 && x % 5 === 0) {
+                                    this.screenBuffer.data[bufferSample] = 255;
+                                    this.screenBuffer.data[bufferSample + 1] = 255;
+                                    this.screenBuffer.data[bufferSample + 2] = 0;
+                                }
                                 
                                 this.screenBuffer.data[bufferSample + 3] = 255;
                             }
@@ -121,8 +134,8 @@ export class Renderer {
         return isMouseInside;
     }
 
-    drawGameObject(ctx, levelObject, tileX, tileY, tileWidth, tileHeight) {
-        const frameBuffer = levelObject.activeAnimation.getFrameBuffer();
+    drawGameObject(ctx, tile, tileX, tileY, tileWidth, tileHeight, ambientRgb) {
+        const frameBuffer = tile.levelObject.activeAnimation.getFrameBuffer();
         //get scaled width/height
         let zoomWidth = Math.floor(frameBuffer.width * tileWidth / TILE_WIDTH);
         let zoomHeight = Math.floor(frameBuffer.height * tileHeight / TILE_HEIGHT); 
@@ -140,9 +153,9 @@ export class Renderer {
                         let bufferSample = 4 * (y * this.screenBuffer.width + x);
                         let textureBuffer = frameBuffer.data;
                         if (textureBuffer[textureSample + 3] === 255 && textureBuffer[textureSample] !== undefined) {
-                            this.screenBuffer.data[bufferSample] = textureBuffer[textureSample];
-                            this.screenBuffer.data[bufferSample + 1] = textureBuffer[textureSample + 1];
-                            this.screenBuffer.data[bufferSample + 2] = textureBuffer[textureSample + 2];
+                            this.screenBuffer.data[bufferSample] = textureBuffer[textureSample] + tile.lightCoefficient * ambientRgb.r;
+                            this.screenBuffer.data[bufferSample + 1] = textureBuffer[textureSample + 1] + tile.lightCoefficient * ambientRgb.g;
+                            this.screenBuffer.data[bufferSample + 2] = textureBuffer[textureSample + 2] + tile.lightCoefficient * ambientRgb.b;
                             this.screenBuffer.data[bufferSample + 3] = 255;
                         }
                     }
