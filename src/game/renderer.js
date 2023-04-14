@@ -51,8 +51,13 @@ export class Renderer {
                             });
                         }
                         
-                        if (drawObjects && level.tiles[x][y]?.levelObject) {
-                            this.drawGameObject(ctx, level.tiles[x][y], tileX, tileY, tileWidth, tileHeight, ambientRgb);
+                        if (drawObjects && level.tiles[x][y].levelObject) {
+                            let isMouseInside = this.drawGameObject(ctx, level.tiles[x][y], tileX, tileY, tileWidth, tileHeight, mouseX, mouseY, ambientRgb);
+                            if (isMouseInside) {
+                                this.mouseTileX = x;
+                                this.mouseTileY = y;
+                                tileText = `X: ${this.mouseTileX} , Y: ${this.mouseTileY}, Zoom: ${camera.zoom}, Object: ${level.tiles[x][y].levelObject.name}`;
+                            }
                         } 
                     } 
                 }
@@ -101,7 +106,7 @@ export class Renderer {
                             let textureSample = 4 * (yTextureSample * TILE_WIDTH + xTextureSample);
                             let textureBuffer = frameBuffer.data;
                             if (textureBuffer[textureSample + 3] === 255 && textureBuffer[textureSample] !== undefined) {
-                                if (!isMouseInside && (4 * (mouseY * this.screenBuffer.width + mouseX)) === bufferSample) {
+                                if ((4 * (mouseY * this.screenBuffer.width + mouseX)) === bufferSample) {
                                     isMouseInside = true;
                                 }
                                 if (drawNonPassables && !tile.passable && x % 3 === 0) {
@@ -134,7 +139,7 @@ export class Renderer {
         return isMouseInside;
     }
 
-    drawGameObject(ctx, tile, tileX, tileY, tileWidth, tileHeight, ambientRgb) {
+    drawGameObject(ctx, tile, tileX, tileY, tileWidth, tileHeight, mouseX, mouseY, ambientRgb) {
         const frameBuffer = tile.levelObject.activeAnimation.getFrameBuffer();
         //get scaled width/height
         let zoomWidth = Math.floor(frameBuffer.width * tileWidth / TILE_WIDTH);
@@ -142,6 +147,8 @@ export class Renderer {
 
         let startX = Math.floor(tileX + tileWidth/2 - zoomWidth/2);
         let startY = Math.floor(tileY + tileHeight - zoomHeight);
+
+        let isMouseInside = false;
 
         for (let x = startX; x < startX + zoomWidth; x++) {
             for (let y = startY; y < startY + zoomHeight; y++) {
@@ -152,6 +159,11 @@ export class Renderer {
                         let textureSample = 4 * (yTextureSample * frameBuffer.width + xTextureSample);
                         let bufferSample = 4 * (y * this.screenBuffer.width + x);
                         let textureBuffer = frameBuffer.data;
+
+                        if ((4 * (mouseY * this.screenBuffer.width + mouseX)) === bufferSample) {
+                            isMouseInside = true;
+                        }
+
                         if (textureBuffer[textureSample + 3] === 255 && textureBuffer[textureSample] !== undefined) {
                             this.screenBuffer.data[bufferSample] = textureBuffer[textureSample] + tile.lightCoefficient * ambientRgb.r;
                             this.screenBuffer.data[bufferSample + 1] = textureBuffer[textureSample + 1] + tile.lightCoefficient * ambientRgb.g;
@@ -161,5 +173,7 @@ export class Renderer {
                     }
             }
         }
+
+        return isMouseInside;
     }
 }

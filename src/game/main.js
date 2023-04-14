@@ -39,9 +39,6 @@ export class Main {
                     tiles[x].push(this.data.tiles['empty'].copy());
                 } else {
                     tiles[x].push(this.data.tiles['stone'].copy());
-                    if (Math.random() > 0.9) {
-                        tiles[x][y].levelObject = this.data.levelObjects['testwall'].copy();
-                    }
                 }                
             }
         }
