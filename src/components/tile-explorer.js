@@ -41,7 +41,7 @@ export function TileExplorer(props) {
                         Object.entries(props.data.tiles).map(([key, value]) =>
                             {
                                 return <ListItemButton selected={selectedListItem === key} key={key} onClick={() => {props.handleTileSelection(key)}}>
-                                    <img style={{width:'30px', height: '30px', marginRight: '5px'}} src={`../rsc/${key}.png`} />
+                                    <img style={{width:'30px', height: '30px', marginRight: '5px'}} src={`./rsc/${key}.png`} />
                                     <ListItemText primary={value.name} />
                                 </ListItemButton>
                             }
@@ -55,7 +55,7 @@ export function TileExplorer(props) {
                         Object.entries(props.data.levelObjects).map(([key, value]) =>
                         {
                             return <ListItemButton selected={selectedListItem === key} key={key} onClick={() => {props.handleObjectSelection(key)}}>
-                                <img style={{width:'30px', height: '30px', marginRight: '5px'}} src={`../rsc/${key}.png`} />
+                                <img style={{width:'30px', height: '30px', marginRight: '5px'}} src={`./rsc/${key}.png`} />
                                 <ListItemText primary={value.name} />
                             </ListItemButton>
                         }
