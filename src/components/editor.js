@@ -1,10 +1,11 @@
 import React, {useRef, useEffect, useState} from "react";
-import { Data } from '../game/data';
 import { Main } from '../game/main';
 import { TitleBar } from './title-bar';
 import { TileExplorer } from './tile-explorer';
 import { NewDialog } from "./new-dialog";
 import { HelpDialog } from "./help-dialog";
+import { Application } from 'pixi.js';
+import { Typography } from "@mui/material";
 
 function download(content, fileName, contentType) {
     var a = document.createElement("a");
@@ -17,8 +18,8 @@ function download(content, fileName, contentType) {
 export function Editor() {
     const canvasRef = useRef();
     const inputFile = useRef();
-    const [data, setData] = useState(undefined);
     const [main, setMain] = useState(undefined);
+    const [data, setData] = useState(undefined);
     const [editMode, setEditMode] = useState('none');
     const [newDialogOpen, setNewDialogOpen] = useState(false);
     const [helpDialogOpen, setHelpDialogOpen] = useState(false);
@@ -27,21 +28,31 @@ export function Editor() {
     const [undoBackups, setUndoBackups] = useState([]);
     const [canUndo, setCanUndo] = useState(false);
     const [ambientColor, setAmbientColor] = useState("#FFFFFF");
+    const [loadProgress, setLoadProgress] = useState(0);
+    
     let mainCreated = false;
+    let useEffectCalled = false;
 
     useEffect(() => {
-        const ctx = canvasRef.current.getContext('2d');
-        if (!mainCreated) {
-            let newData = new Data();
-            newData.load();
-            let newMain = new Main(ctx, newData);
-            newMain.start();
-            setData(newData);
-            setMain(newMain);
-            setUndoBackups([newMain.level.copy()]);
-            mainCreated = true;
+        if (!useEffectCalled) {
+            const webglApp = new Application({width: 1120, height: 700, background: '#48657D', view: canvasRef.current});
+            if (!mainCreated) {
+                let newMain = new Main(webglApp);
+                setMain(newMain);
+
+                newMain.load(onLoadProgress).then(() => {
+                    mainCreated = true;
+                    setData(newMain.data);
+                });
+            }
+
+            useEffectCalled = true;
         }
     }, []);
+
+    function onLoadProgress(progress) {
+        setLoadProgress(progress);
+    }
 
     function handleEditMode(mode) {
         if (editMode !== mode) {
@@ -151,65 +162,71 @@ export function Editor() {
     }
 
     return (
-        <div tabIndex="0"
-            onKeyDown={(event) => {
-                main?.handleKeyDown(event.key);
-            }}
-            onKeyUp={() => {
-                main?.handleKeyUp();
-            }}
-        >
-            <TitleBar 
-                handleEditMode={handleEditMode} 
-                handleAStarCalc={handleAStarCalc} 
-                handleDrawObjectsChange={handleDrawObjectsChange} 
-                handleFillChange={handleFillChange}
-                handleNew={handleNew} 
-                handleLoad={handleLoad} 
-                handleSave={handleSave} 
-                handleHelp={handleHelp} 
-                handleUndo={handleUndo}
-                ambientColor={ambientColor}
-                handleAmbientColorChange={handleAmbientColorChange}
-                canUndo={canUndo}
-                editMode={editMode} 
-                drawObjects={drawObjects}
-                fill={fill}/>
-            <div style={{display: 'flex', flexDirection: 'row'}}>
-                <canvas style={{minWidth: '82%', maxHeight: '92vh', border:'2px', borderColor:'white'}}
-                    id='scene' ref={canvasRef}
-                    width='640' height='400'
-                    onWheel={(event) => {
-                        main?.handleMouseWheel(event.deltaY);
-                    }}
-                    onMouseMove={(event) => {
-                        let rect = canvasRef.current.getBoundingClientRect();
-                        let x = event.clientX - rect.left;
-                        let y = event.clientY - rect.top;
-                        main?.handleMouseMove(
-                            x / canvasRef.current.clientWidth * canvasRef.current.width, 
-                            y / canvasRef.current.clientHeight * canvasRef.current.height, 
-                            editMode);
-                    }}
-                    onMouseDown={(event) => {
-                        if (event.button === 0 && !fill) {
-                            main?.handleMouseDown(editMode);
-                        } 
-                    }}
-                    onMouseUp={(event) => {
-                        if (event.button === 0) {
-                            main?.handleMouseUp(editMode, fill);
-                            addUndo();
-                        } else if (event.button === 1) {
-                            main?.handleMouseClick();
-                        }
-                    }}
-                ></canvas> 
-                <TileExplorer data={data} handleTileSelection={handleTileSelection} handleObjectSelection={handleObjectSelection} editMode={editMode}/>
-                <NewDialog open={newDialogOpen} handleCloseNewDialog={handleCloseNewDialog} handleCreateNewMap={handleCreateNewMap}/>
-                <HelpDialog open={helpDialogOpen} handleCloseHelp={handleCloseHelp}/>
+        <div>
+            <div tabIndex="0"
+                onKeyDown={(event) => {
+                    main?.handleKeyDown(event.key);
+                }}
+                onKeyUp={() => {
+                    main?.handleKeyUp();
+                }}
+                hidden={loadProgress !== 1}
+            >
+                <TitleBar 
+                    handleEditMode={handleEditMode} 
+                    handleAStarCalc={handleAStarCalc} 
+                    handleDrawObjectsChange={handleDrawObjectsChange} 
+                    handleFillChange={handleFillChange}
+                    handleNew={handleNew} 
+                    handleLoad={handleLoad} 
+                    handleSave={handleSave} 
+                    handleHelp={handleHelp} 
+                    handleUndo={handleUndo}
+                    ambientColor={ambientColor}
+                    handleAmbientColorChange={handleAmbientColorChange}
+                    canUndo={canUndo}
+                    editMode={editMode} 
+                    drawObjects={drawObjects}
+                    fill={fill}/>
+                <div style={{display: 'flex', flexDirection: 'row'}}>
+                    <canvas style={{minWidth: '82%', maxHeight: '92vh', border:'2px', borderColor:'white'}}
+                        id='scene' ref={canvasRef}
+                        width='1120' height='700'
+                        onWheel={(event) => {
+                            main?.handleMouseWheel(event.deltaY);
+                        }}
+                        onMouseMove={(event) => {
+                            let rect = canvasRef.current.getBoundingClientRect();
+                            let x = event.clientX - rect.left;
+                            let y = event.clientY - rect.top;
+                            main?.handleMouseMove(
+                                x / canvasRef.current.clientWidth * canvasRef.current.width, 
+                                y / canvasRef.current.clientHeight * canvasRef.current.height, 
+                                editMode);
+                        }}
+                        onMouseDown={(event) => {
+                            if (event.button === 0 && !fill) {
+                                main?.handleMouseDown(editMode);
+                            } 
+                        }}
+                        onMouseUp={(event) => {
+                            if (event.button === 0) {
+                                main?.handleMouseUp(editMode, fill);
+                                addUndo();
+                            } else if (event.button === 1) {
+                                main?.handleMouseClick();
+                            }
+                        }}
+                    ></canvas> 
+                    <TileExplorer data={data} handleTileSelection={handleTileSelection} handleObjectSelection={handleObjectSelection} editMode={editMode}/>
+                    <NewDialog open={newDialogOpen} handleCloseNewDialog={handleCloseNewDialog} handleCreateNewMap={handleCreateNewMap}/>
+                    <HelpDialog open={helpDialogOpen} handleCloseHelp={handleCloseHelp}/>
+                </div>
+                <input type='file' id='file' ref={inputFile} style={{display: 'none'}} onChange={(event) => handleInputFileChanged(event.target.files[0])}/>
             </div>
-            <input type='file' id='file' ref={inputFile} style={{display: 'none'}} onChange={(event) => handleInputFileChanged(event.target.files[0])}/>
+            <div hidden={loadProgress === 1} style={{position:'absolute', top: '45%', left: '45%'}}>
+                <Typography>{`Loading... ${Math.floor(loadProgress * 100)}%`}</Typography>
+            </div> 
         </div>
     )
 }

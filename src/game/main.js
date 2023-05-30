@@ -1,16 +1,21 @@
-import { Renderer } from './renderer';
+import { WebGLRenderer } from './webgl-renderer';
 import { Camera } from './camera';
 import { Level } from './level';
 import { aStar } from './astar';
 import { Tile } from './tile';
 import { LevelObject } from './level-object';
+import { Data } from './data';
 
 export class Main {
-    constructor(ctx, data) {
-        this.ctx = ctx;
-        this.data = data;
+    constructor(webglApp) {
+        this.webglApp = webglApp;
+    }
 
-        this.renderer = new Renderer();
+    async load(onLoadingProgress) {
+        this.data = new Data(onLoadingProgress);
+        await this.data.load();
+
+        this.renderer = new WebGLRenderer(this.webglApp, this.data);
         this.camera = new Camera();
         this.camera.x = 25;
         this.camera.y = 25;
@@ -33,7 +38,7 @@ export class Main {
                 if (tileType > 0.2) {
                     tiles[x].push(this.data.tiles['grass'].copy());
                     if (Math.random() > 0.9) {
-                        tiles[x][y].levelObject = this.data.levelObjects['testobject'].copy();
+                        tiles[x][y].levelObject = this.data.levelObjects['rock1'].copy();
                     }
                 } else if (tileType > 0.19) {
                     tiles[x].push(this.data.tiles['empty'].copy());
@@ -43,6 +48,9 @@ export class Main {
             }
         }
         this.level = new Level(tiles);
+        this.level.ambientLight = "#FFFFFF";
+
+        this.start();
     }
 
     createNewLevel(width, height) {
@@ -84,9 +92,9 @@ export class Main {
         const parsedLevel = JSON.parse(json);
         for(let x = 0; x < parsedLevel.tiles.length; x++) {
             for(let y = 0; y < parsedLevel.tiles[x].length; y++) {
-                parsedLevel.tiles[x][y].activeAnimation = this.data.animations[parsedLevel.tiles[x][y].activeAnimation];
+                parsedLevel.tiles[x][y].activeAnimation = this.data.animations[parsedLevel.tiles[x][y].activeAnimation].copy();
                 if (parsedLevel.tiles[x][y].levelObject) {
-                    parsedLevel.tiles[x][y].levelObject.activeAnimation = this.data.animations[parsedLevel.tiles[x][y].levelObject.activeAnimation];
+                    parsedLevel.tiles[x][y].levelObject.activeAnimation = this.data.animations[parsedLevel.tiles[x][y].levelObject.activeAnimation].copy();
                     Object.setPrototypeOf(parsedLevel.tiles[x][y].levelObject, LevelObject.prototype);
                 }
 
@@ -113,9 +121,10 @@ export class Main {
     }
     
     update() {
+        this.webglApp.stage.removeChildren();
         this.camera.x += this.cameraMoveX;
         this.camera.y += this.cameraMoveY;
-        this.renderer.draw(this.ctx, this.camera, this.level, this.mouseX, this.mouseY, this.aStarPath, true, true, this.drawObjects);
+        this.renderer.draw(this.camera, this.level, this.mouseX, this.mouseY, this.aStarPath, true, true, this.drawObjects);
     }
 
     placeEdit(editMode, fill = false) {
@@ -222,18 +231,39 @@ export class Main {
     }
 
     fillTile(x, y, currentTile, newTile) {
-        if (x > -1 && x < this.level.tiles.length &&
-            y > -1 && y < this.level.tiles[0].length &&
-            currentTile.name === this.level.tiles[x][y].name) {
-                let currentLightCoefficient = this.level.tiles[x][y].lightCoefficient;
-                this.level.tiles[x][y] = newTile;
-                this.level.tiles[x][y].lightCoefficient = currentLightCoefficient;
+        let neighbors = [{x: x, y: y}];
 
-                this.fillTile(x+1, y, currentTile, newTile.copy());
-                this.fillTile(x-1, y, currentTile, newTile.copy());
-                this.fillTile(x, y+1, currentTile, newTile.copy());
-                this.fillTile(x, y-1, currentTile, newTile.copy());
+        while(neighbors.length > 0) {
+            let newNeighbors = [];
+            for (let n = 0; n < neighbors.length; n++) {
+                let currentX = neighbors[n].x;
+                let currentY = neighbors[n].y
+                this.level.tiles[currentX][currentY] = newTile.copy();
+
+                if (currentX + 1 > -1 && currentX + 1 < this.level.tiles.length &&
+                    currentY > -1 && currentY < this.level.tiles[0].length &&
+                    currentTile.name === this.level.tiles[currentX + 1][currentY].name) {
+                        newNeighbors.push({x: currentX + 1, y: currentY})
+                    }
+                if (currentX - 1 > -1 && currentX - 1 < this.level.tiles.length &&
+                    currentY > -1 && currentY < this.level.tiles[0].length &&
+                    currentTile.name === this.level.tiles[currentX - 1][currentY].name) {
+                        newNeighbors.push({x: currentX - 1, y: currentY})
+                    }
+                if (currentX > -1 && currentX < this.level.tiles.length &&
+                    currentY + 1 > -1 && currentY + 1 < this.level.tiles[0].length &&
+                    currentTile.name === this.level.tiles[currentX][currentY + 1].name) {
+                        newNeighbors.push({x: currentX, y: currentY + 1})
+                    }
+                if (currentX > -1 && currentX < this.level.tiles.length &&
+                    currentY - 1 > -1 && currentY - 1 < this.level.tiles[0].length &&
+                    currentTile.name === this.level.tiles[currentX][currentY - 1].name) {
+                        newNeighbors.push({x: currentX, y: currentY - 1})
+                    }
             }
+
+            neighbors = newNeighbors;
+        }
     }
 
     calculateAStar() {
